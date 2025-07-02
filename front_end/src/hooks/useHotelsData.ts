@@ -10,10 +10,11 @@ export function useInfiniteHotels() {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<any>(null);
   const [provinces, setProvinces] = useState<any[]>([]);
+  // sadjka
 
   const fetchHotels = useCallback(async () => {
     if (loading || !hasMore) return;
-    setLoading(true);
+    setLoading(true); 
     try {
       const res = await getHotelData(`${API_CONFIG.BASE_URL}/user/home?page=${page}`);
       const newHotels = res.result.hotels.content;
