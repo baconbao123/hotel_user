@@ -31,8 +31,8 @@ const UserHome: React.FC = () => {
       <ul>
         {data?.result.hotels.content.map((hotel) => (
           <li key={hotel.id}>
-            <img src={hotel.avatarUrl} alt={hotel.address} width={80} />
-            <div>{hotel.address}</div>
+            <img src={hotel.avatarUrl} alt={hotel.address} width={80} />  
+            <div>{hotel.address}</div> 
             <div>Giá/đêm: {hotel.priceNight}</div>
           </li>
         ))}
