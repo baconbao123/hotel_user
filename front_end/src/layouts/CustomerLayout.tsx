@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Bell, Calendar, ChevronDown, Heart, LogIn, LogOut, Search, ShoppingBag, User } from 'lucide-react';
+import PageWrapper from '@/components/PageWrapper';
 
 type CustomerLayoutProps = {
   children: React.ReactNode;
@@ -22,6 +23,7 @@ export const CustomerLayout = ({ children, isLoggedIn = false }: CustomerLayoutP
   const [searchTerm, setSearchTerm] = useState('');
 
   return (
+    <PageWrapper>
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-hotel-blue sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -155,8 +157,9 @@ export const CustomerLayout = ({ children, isLoggedIn = false }: CustomerLayoutP
             <p>&copy; {new Date().getFullYear()} Hospitopia Hub. All rights reserved.</p>
           </div>
         </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </PageWrapper>
   );
 };
 
