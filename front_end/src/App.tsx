@@ -26,7 +26,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          <Route path="/hotel/:id" element={<HotelDetail />} />
+          <Route path="/hotel/:hotelId" element={<HotelDetail />} />
 
           
           {/* Admin Routes */}

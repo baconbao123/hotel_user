@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart, Star } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 interface HotelCardProps {
   hotel: {
     id: string;
@@ -35,10 +35,10 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
   const discountedPrice = discount
     ? parseInt(pricePerNight.replace(/[^0-9]/g, "")) * (1 - discount / 100)
     : null;
-  const navigate = useNavigate();
-  const handleViewDetails = () => {
-    navigate("/hotel/1"); // thay đổi đường dẫn này nếu cần
-  };
+  // const navigate = useNavigate();
+  // const handleViewDetails = () => {
+   
+  // };
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -111,9 +111,8 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
         <Button
           size="sm"
           className="bg-hotel-blue hover:bg-hotel-blue-dark"
-          onClick={handleViewDetails}
         >
-          View Details
+          <Link to="hotel/1">View Details</Link>
         </Button>
       </CardFooter>
     </Card>
