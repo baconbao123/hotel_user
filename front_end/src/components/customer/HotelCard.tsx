@@ -1,11 +1,10 @@
-
-import React from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Heart, Star } from 'lucide-react';
-
+import React from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Heart, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 interface HotelCardProps {
   hotel: {
     id: string;
@@ -34,8 +33,12 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
   } = hotel;
 
   const discountedPrice = discount
-    ? parseInt(pricePerNight.replace(/[^0-9]/g, '')) * (1 - discount / 100)
+    ? parseInt(pricePerNight.replace(/[^0-9]/g, "")) * (1 - discount / 100)
     : null;
+  const navigate = useNavigate();
+  const handleViewDetails = () => {
+    navigate("/hotel/1"); // thay đổi đường dẫn này nếu cần
+  };
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -87,18 +90,29 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
         <div>
           {discount ? (
             <div>
-              <span className="text-sm text-gray-500 line-through">{pricePerNight}</span>
+              <span className="text-sm text-gray-500 line-through">
+                {pricePerNight}
+              </span>
               <p className="font-bold text-shopee">
-                ${discountedPrice?.toFixed(0)}<span className="text-sm font-normal"> / night</span>
+                ${discountedPrice?.toFixed(0)}
+                <span className="text-sm font-normal"> / night</span>
               </p>
             </div>
           ) : (
             <p className="font-bold">
-              {pricePerNight}<span className="text-sm font-normal text-gray-500"> / night</span>
+              {pricePerNight}
+              <span className="text-sm font-normal text-gray-500">
+                {" "}
+                / night
+              </span>
             </p>
           )}
         </div>
-        <Button size="sm" className="bg-hotel-blue hover:bg-hotel-blue-dark">
+        <Button
+          size="sm"
+          className="bg-hotel-blue hover:bg-hotel-blue-dark"
+          onClick={handleViewDetails}
+        >
           View Details
         </Button>
       </CardFooter>
