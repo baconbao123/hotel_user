@@ -102,7 +102,7 @@ export const HotelSearchForm = () => {
             </Popover>
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Guests & Rooms</label>
             <div className="grid grid-cols-2 gap-2">
               <Select value={guests} onValueChange={setGuests}>
@@ -129,7 +129,7 @@ export const HotelSearchForm = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 flex justify-center">

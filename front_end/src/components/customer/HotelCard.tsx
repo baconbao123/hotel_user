@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart, Star } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 interface HotelCardProps {
   hotel: {
     id: string;
@@ -15,7 +16,7 @@ interface HotelCardProps {
     rating: number;
     reviewCount: number;
     discount?: number;
-    amenities: string[];
+    amenities: { name: string; icon?: string }[];
   };
 }
 
@@ -37,7 +38,7 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
     : null;
   // const navigate = useNavigate();
   // const handleViewDetails = () => {
-   
+
   // };
 
   return (
@@ -74,11 +75,26 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
         </div>
         <p className="text-sm text-gray-500 mt-1">{location}</p>
         <div className="mt-2 flex flex-wrap gap-1">
-          {amenities.slice(0, 3).map((amenity, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {amenity}
-            </Badge>
-          ))}
+          {amenities.slice(0, 3).map((amenity, index) => {
+            if (typeof amenity === "string") {
+              return (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {amenity}
+                </Badge>
+              );
+            } else {
+              return (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="text-xs flex items-center gap-1"
+                >
+                  {amenity.icon && <i className={amenity.icon}></i>}
+                  {amenity.name}
+                </Badge>
+              );
+            }
+          })}
           {amenities.length > 3 && (
             <Badge variant="outline" className="text-xs">
               +{amenities.length - 3} more
@@ -109,10 +125,11 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
           )}
         </div>
         <Button
+          asChild
           size="sm"
           className="bg-hotel-blue hover:bg-hotel-blue-dark"
         >
-          <Link to="hotel/1">View Details</Link>
+          <Link to={`/hotel/${id}`}>View Details</Link>
         </Button>
       </CardFooter>
     </Card>
