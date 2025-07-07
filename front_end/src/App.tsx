@@ -10,6 +10,7 @@ import Register from "./pages/auth/Register";
 import AdminDashboard from "./pages/admin/Dashboard";
 import OwnerDashboard from "./pages/owner/Dashboard";
 import NotFound from "./pages/NotFound";
+import HotelDetail from "./pages/hotel/HotelDetail";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          <Route path="/hotel/:id" element={<HotelDetail />} />
+
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
