@@ -4,7 +4,7 @@ import { API_CONFIG } from "@/config/environment";
 
 export function useInfiniteHotels() {
   const [hotels, setHotels] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

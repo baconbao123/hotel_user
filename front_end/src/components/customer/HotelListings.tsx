@@ -55,23 +55,18 @@ const HotelListings: React.FC = () => {
     }
   ];
 
-  const mockHotel = {
+  const baseHotelImg = import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL;
+  const userHotel = {
     id: "1",
-    name: "Khách sạn Mẫu 1",
-    imageUrl: "https://via.placeholder.com/300x200?text=Hotel+1",
-    location: "Hà Nội",
-    pricePerNight: "$100",
-    rating: 4.5,
-    reviewCount: 120,
+    name: "Hotel Example",
+    imageUrl: `${baseHotelImg}/0d5f495db6a94a0090e6dcfc20102af7.png`,
+    location: "1 a Street, Ward An Phú, An Phú District, An Giang City",
+    pricePerNight: "$20",
+    rating: 0,
+    reviewCount: 0,
     discount: 0,
     amenities: [
-      { name: "WiFi", icon: "fa fa-wifi" },
-      { name: "Parking", icon: "fa fa-parking" }
-    ],
-    description: "Khách sạn Mẫu 1 nằm ở trung tâm Hà Nội, thuận tiện di chuyển, đầy đủ tiện nghi.",
-    rooms: [
-      { name: "Phòng Đơn", price: "$80/đêm" },
-      { name: "Phòng Đôi", price: "$120/đêm" }
+      { name: "check", icon: "pi pi-check" }
     ]
   };
 
@@ -107,7 +102,7 @@ const HotelListings: React.FC = () => {
                     const mappedHotel = {
                       id: hotel.id.toString(),
                       name: hotel.address || 'No name',
-                      imageUrl: hotel.avatarUrl || '',
+                      imageUrl: hotel.avatarUrl ? `${baseHotelImg}/${hotel.avatarUrl}` : '',
                       location: hotel.address || '',
                       pricePerNight: hotel.priceNight ? `$${hotel.priceNight}` : 'N/A',
                       rating: 0,
@@ -117,7 +112,7 @@ const HotelListings: React.FC = () => {
                     };
                     return <HotelCard key={mappedHotel.id} hotel={mappedHotel} />;
                   })
-                : mockHotels.map((hotel) => (
+                : [userHotel, ...mockHotels].map((hotel) => (
                     <HotelCard key={hotel.id} hotel={hotel} />
                   ))
               }

@@ -1,10 +1,11 @@
 import CustomerLayout from '@/layouts/CustomerLayout';
-import PageWrapper from '@/components/PageWrapper';
+import PageWrapper from '@/components/common/PageWrapper';
 import HotelListings from '@/components/customer/HotelListings';
 import HotelSearchForm from '@/components/customer/HotelSearchForm';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const hotels = [
   // ... giữ nguyên dữ liệu hotels như cũ ...
