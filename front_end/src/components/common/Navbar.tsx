@@ -11,10 +11,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Bell, Calendar, ChevronDown, Heart, LogIn, LogOut, Search, ShoppingBag, User } from 'lucide-react';
+import { Badge as AntdBadge, message } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = ({ isLoggedIn = false }: { isLoggedIn?: boolean }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +26,20 @@ const Navbar = ({ isLoggedIn = false }: { isLoggedIn?: boolean }) => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateFavCount = () => {
+      const favs = JSON.parse(localStorage.getItem('favoriteHotels') || '[]');
+      setFavoriteCount(favs.length);
+    };
+    updateFavCount();
+    window.addEventListener('storage', updateFavCount);
+    window.addEventListener('favorite-hotels-changed', updateFavCount as any);
+    return () => {
+      window.removeEventListener('storage', updateFavCount);
+      window.removeEventListener('favorite-hotels-changed', updateFavCount as any);
+    };
   }, []);
 
   return (
@@ -60,11 +78,13 @@ const Navbar = ({ isLoggedIn = false }: { isLoggedIn?: boolean }) => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <a href="/favorites" className="text-white hidden lg:flex items-center">
-              <Heart className="h-5 w-5 mr-1" />
-              <span>Favorites</span>
-            </a>
-            <a href="/bookings" className="text-white hidden lg:flex items-center">
+              
+            <div className="relative cursor-pointer" onClick={() => navigate('/favorites')}>
+              <AntdBadge count={favoriteCount} size="small" offset={[0, 6]}>
+                <Heart className="h-6 w-6 text-white hover:text-shopee transition" />
+              </AntdBadge>
+            </div>
+            <a href="/booking" className="text-white hidden lg:flex items-center">
               <ShoppingBag className="h-5 w-5 mr-1" />
               <span>My Bookings</span>
             </a>
