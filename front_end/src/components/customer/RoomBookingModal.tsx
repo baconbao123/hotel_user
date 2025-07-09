@@ -10,6 +10,8 @@ import { CreditCardOutlined, DollarOutlined, WalletOutlined } from '@ant-design/
 import html2canvas from 'html2canvas';
 import { useInfiniteHotels } from '@/hooks/useHotelsData';
 import { jwtDecode } from 'jwt-decode';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 interface RoomBookingModalProps {
   roomId: string;
@@ -76,7 +78,15 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
       console.log("userToken", user);
     } catch (e) { console.error('Error decoding token:', e); }
   }
+  const userId = useSelector((state: RootState) => state.userDataSlice.id);
+  const userName = useSelector((state: RootState) => state.userDataSlice.fullname);
+  const email = useSelector((state: RootState) => state.userDataSlice.email);
+  const phoneNumber = useSelector((state: RootState) => state.userDataSlice.phoneNumber);
+  const avatarUrl = useSelector((state: RootState) => state.userDataSlice.avatarUrl);
+  useEffect(() => {
+    console.log("check usser id ", userId, "userName", userName , "email", email);
 
+  }, [userId, userName]);
   useEffect(() => {
     setSelectedHour(null);
   }, [hours]);
@@ -104,7 +114,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
         });
         setBookedSlots(slots);
         setRoomInfo(res.data.roomInfo);
-        console.log('bookedSlots:', slots);
+        // console.log('bookedSlots:', slots);
       } catch (err) {
         setError('Không lấy được giờ đã đặt!');
       } finally {
@@ -179,11 +189,11 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
             <Card bordered={false} className="rounded-2xl shadow-sm mb-4">
               <div className="font-semibold mb-2 text-[#FF6600]">Guest Information</div>
               <div className="flex items-center gap-3 mb-2">
-                <Avatar src={user.avatarUrl} size={48} />
+                <Avatar src={avatarUrl} size={48} />
                 <div>
-                  <div className="font-semibold text-base">{user.name}</div>
-                  <div className="text-sm text-gray-700">{user.email}</div>
-                  <div className="text-sm text-gray-700">{user.phoneNumber}</div>
+                  <div className="font-semibold text-base">{userName}</div>
+                  <div className="text-sm text-gray-700">{email}</div>
+                  <div className="text-sm text-gray-700">{phoneNumber}</div>
                 </div>
               </div>
             </Card>
@@ -298,6 +308,27 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
               loading={loading}
               style={{ background: '#FF6600', borderColor: '#FF6600', fontWeight: 600 }}
               onClick={async () => {
+                // Validate các trường bắt buộc
+                if (!userName || !email || !phoneNumber) {
+                  setError('Please provide your name, email, and phone number.');
+                  return;
+                }
+                if (!date) {
+                  setError('Please select a date.');
+                  return;
+                }
+                if (!selectedHour) {
+                  setError('Please select a start hour.');
+                  return;
+                }
+                if (!methodId) {
+                  setError('Please select a payment method.');
+                  return;
+                }
+                if (bookingMode === 'hourly' && (!hours || hours < 1)) {
+                  setError('Please select the number of hours.');
+                  return;
+                }
                 const token = Cookies.get('token');
                 if (!token) {
                   message.warning('Please login to book a room');
@@ -307,7 +338,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
                 setError('');
                 try {
                   const formData = new FormData();
-                  formData.append('userId', user.id || '');
+                  formData.append('userId', String(userId));
                   formData.append('roomId', roomId);
                   formData.append('checkInTime', checkInTime);
                   formData.append('checkOutTime', checkOutTime as string);
@@ -340,7 +371,12 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
                     checkOutTime,
                     amount,
                     method: paymentMethods.find(m => m.value === methodId)?.label?.props?.children?.[1]?.props?.children || 'Payment',
-                    guest: user,
+                    guest: {
+                      name: userName,
+                      email: email,
+                      phoneNumber: phoneNumber,
+                      avatarUrl: avatarUrl
+                    },
                     note,
                     hotelName,
                     roomName,

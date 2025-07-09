@@ -18,7 +18,7 @@ export function useInfiniteHotels() {
     try {
       const res = await getHotelData(`${API_CONFIG.BASE_URL}/user/home?page=${page}`);
       const newHotels = res.result.hotels.content;
-      console.log("newHotels",newHotels);
+      // console.log("newHotels",newHotels);
       setHotels(prev => [...prev, ...newHotels]);
       setHasMore(newHotels.length > 0);
       setPage(prev => prev + 1);

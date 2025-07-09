@@ -19,13 +19,13 @@ export const HotelSearchForm = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle search logic here
-    console.log({
-      location,
-      checkInDate,
-      checkOutDate,
-      guests,
-      rooms,
-    });
+    // console.log({
+    //   location,
+    //   checkInDate,
+    //   checkOutDate,
+    //   guests,
+    //   rooms,
+    // });
   };
 
   return (

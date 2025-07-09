@@ -24,10 +24,10 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    setUser(state, action: PayloadAction<UserLogin>) {
+    setUser(state, action: any) {
       state.id = action.payload.id || 0;
       state.email = action.payload.email || "";
-      state.fullname = action.payload.fullname || "";
+      state.fullname = action.payload.fullName||"";
       state.phoneNumber = action.payload.phoneNumber || "";
       state.avatarUrl = action.payload.avatarUrl || "";
       state.loading = false;
