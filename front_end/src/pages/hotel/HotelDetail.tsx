@@ -106,7 +106,7 @@ export default function HotelDetail() {
   const [bookingError, setBookingError] = useState('');
 
   useEffect(() => {
-    const url = `http://localhost:9898/hotel/user/hotel/${hotelId}`;
+    const url = `http://103.161.172.90:9898/hotel/user/hotel/${hotelId}`;
     const fetchData = async () => {
       try {
         const res = await axios.get<ApiResponse>(url);
@@ -146,7 +146,7 @@ export default function HotelDetail() {
         guest: `${room.limit} guests`,
         images: [
           room.avatarRoom
-            ? `http://localhost:9898/hotel/upload/hotel/${room.avatarRoom}`
+            ? `http://103.161.172.90:9898/hotel/upload/hotel/${room.avatarRoom}`
             : "/placeholder.jpg",
         ],
         features: ["Comfortable bed", "High-speed Wi-Fi"],
@@ -183,7 +183,7 @@ export default function HotelDetail() {
   // Giả lập thông tin phòng, bạn có thể lấy từ dữ liệu thực tế
   const room = hotelData ? {
     name: hotelData.types?.[0]?.rooms?.[0]?.name || 'Standard Room',
-    imageUrl: hotelData.types?.[0]?.rooms?.[0]?.avatarRoom ? `http://localhost:9898/hotel/upload/hotel/${hotelData.types[0].rooms[0].avatarRoom}` : '/placeholder.jpg',
+    imageUrl: hotelData.types?.[0]?.rooms?.[0]?.avatarRoom ? `http://103.161.172.90:9898/hotel/upload/hotel/${hotelData.types[0].rooms[0].avatarRoom}` : '/placeholder.jpg',
     price: hotelData.types?.[0]?.rooms?.[0]?.priceNight || 170000,
     hotelName: hotelData.hotel.name,
     address: hotelData.hotel.address
@@ -207,7 +207,7 @@ export default function HotelDetail() {
               ? hotelData.hotel.images.map((img, idx) => (
                   <div key={idx}>
                     <img
-                      src={`http://localhost:9898/hotel/upload/hotel/${img.name}`}
+                      src={`http://103.161.172.90:9898/hotel/upload/hotel/${img.name}`}
                       alt={`Hotel ${idx}`}
                       className="h-[300px] object-cover rounded-xl"
                     />
