@@ -17,6 +17,8 @@ import RoomBookingModal from '@/components/customer/RoomBookingModal';
 import { Modal, message } from 'antd';
 import { isAuthenticated } from "@/lib/utils";
 import AuthRequiredModal from '@/components/common/AuthRequiredModal';
+import { useDispatch } from 'react-redux';
+import { setHotelDetail, setRoomDetail } from '@/store/slice/commonDataSlice';
 
 type RoomRate = {
   name: string;
@@ -108,6 +110,8 @@ export default function HotelDetail() {
   const [bookingError, setBookingError] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const url = `http://103.161.172.90:9898/hotel/user/hotel/${hotelId}`;
     const fetchData = async () => {
@@ -131,6 +135,21 @@ export default function HotelDetail() {
     setSelectedRoom(room);
     setSelectedRateIndex(rateIndex);
     setShowDetail(true);
+    // Lưu thông tin khách sạn và phòng vào Redux
+    if (hotelData) {
+      dispatch(setHotelDetail(hotelData.hotel));
+    }
+    dispatch(setRoomDetail({
+      id: room.roomId,
+      name: room.mainName,
+      description: room.description,
+      area: Number(room.size),
+      limit: Number(room.guest),
+      avatarRoom: room.images?.[0] || '',
+      priceNight: Number(room.rates?.[0]?.priceOvernight?.replace(/[^\d.]/g, '')),
+      priceHours: Number(room.rates?.[1]?.priceOvernight?.replace(/[^\d.]/g, '')),
+      facilities: room.facilities
+    }));
   };
 
   const roomRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([]);

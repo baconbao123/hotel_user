@@ -6,6 +6,7 @@ import 'antd/dist/reset.css';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { CreditCardOutlined, DollarOutlined, WalletOutlined } from '@ant-design/icons';
+// import { QRCode } from 'qrcode.react';
 
 import html2canvas from 'html2canvas';
 import { useInfiniteHotels } from '@/hooks/useHotelsData';
@@ -83,6 +84,8 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
   const email = useSelector((state: RootState) => state.userDataSlice.email);
   const phoneNumber = useSelector((state: RootState) => state.userDataSlice.phoneNumber);
   const avatarUrl = useSelector((state: RootState) => state.userDataSlice.avatarUrl);
+  const hotelDetail = useSelector((state: RootState) => state.commonData.hotelDetail);
+  const roomDetail = useSelector((state: RootState) => state.commonData.roomDetail);
   useEffect(() => {
     console.log("check usser id ", userId, "userName", userName , "email", email);
 
@@ -407,14 +410,27 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
             title="Booking Successful!"
             subTitle={billData?.bookingId ? `Booking ID: ${billData.bookingId}` : ''}
           />
+          <div className="flex justify-center my-4">
+            {/* <QRCode
+              value={JSON.stringify({
+                bookingId: billData?.bookingId,
+                guest: billData?.guest?.name,
+                roomId: billData?.roomId,
+                checkIn: billData?.checkInTime,
+              })}
+              size={128}
+              level="H"
+              includeMargin={true}
+            /> */}
+          </div>
           <Descriptions column={1} bordered size="middle">
-            <Descriptions.Item label="Hotel Name">{billData?.hotelName}</Descriptions.Item>
-            <Descriptions.Item label="Room Name">{billData?.roomName}</Descriptions.Item>
-            <Descriptions.Item label="Hotel Address">{billData?.hotelAddress}</Descriptions.Item>
+            <Descriptions.Item label="Hotel Name">{hotelDetail?.name || billData?.hotelName}</Descriptions.Item>
+            <Descriptions.Item label="Room Name">{roomDetail?.name || billData?.roomName}</Descriptions.Item>
+            <Descriptions.Item label="Hotel Address">{hotelDetail?.address || billData?.hotelAddress}</Descriptions.Item>
             <Descriptions.Item label="Guest Name">{billData?.guest?.name}</Descriptions.Item>
             <Descriptions.Item label="Email">{billData?.guest?.email}</Descriptions.Item>
             <Descriptions.Item label="Phone">{billData?.guest?.phoneNumber}</Descriptions.Item>
-            <Descriptions.Item label="Room ID">{billData?.roomId}</Descriptions.Item>
+            <Descriptions.Item label="Room ID">{roomDetail?.id || billData?.roomId}</Descriptions.Item>
             <Descriptions.Item label="Check-in">{billData?.checkInTime}</Descriptions.Item>
             <Descriptions.Item label="Check-out">{billData?.checkOutTime}</Descriptions.Item>
             <Descriptions.Item label="Amount">{billData?.amount?.toLocaleString()}₫</Descriptions.Item>
