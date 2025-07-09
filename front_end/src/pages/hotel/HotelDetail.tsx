@@ -14,7 +14,11 @@ import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import "primeicons/primeicons.css"; // Import PrimeIcons CSS
 import CustomerLayout from "@/layouts/CustomerLayout";
 import RoomBookingModal from '@/components/customer/RoomBookingModal';
-import { Modal } from 'antd';
+import { Modal, message } from 'antd';
+import { isAuthenticated } from "@/lib/utils";
+import AuthRequiredModal from '@/components/common/AuthRequiredModal';
+import { useDispatch } from 'react-redux';
+import { setHotelDetail, setRoomDetail } from '@/store/slice/commonDataSlice';
 
 type RoomRate = {
   name: string;
@@ -104,6 +108,9 @@ export default function HotelDetail() {
   const [bookingDate, setBookingDate] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const url = `http://103.161.172.90:9898/hotel/user/hotel/${hotelId}`;
@@ -128,6 +135,21 @@ export default function HotelDetail() {
     setSelectedRoom(room);
     setSelectedRateIndex(rateIndex);
     setShowDetail(true);
+    // Lưu thông tin khách sạn và phòng vào Redux
+    if (hotelData) {
+      dispatch(setHotelDetail(hotelData.hotel));
+    }
+    dispatch(setRoomDetail({
+      id: room.roomId,
+      name: room.mainName,
+      description: room.description,
+      area: Number(room.size),
+      limit: Number(room.guest),
+      avatarRoom: room.images?.[0] || '',
+      priceNight: Number(room.rates?.[0]?.priceOvernight?.replace(/[^\d.]/g, '')),
+      priceHours: Number(room.rates?.[1]?.priceOvernight?.replace(/[^\d.]/g, '')),
+      facilities: room.facilities
+    }));
   };
 
   const roomRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([]);
@@ -135,6 +157,15 @@ export default function HotelDetail() {
   const handleTypeRoomClick = (index: number) => {
     roomRefs.current[index]?.current?.scrollIntoView({ behavior: "smooth" });
     setSelectedRoomIndex(index);
+  };
+
+  // Handle Reserve Now button click
+  const handleReserveNow = () => {
+    if (!isAuthenticated()) {
+      setShowAuthModal(true);
+      return;
+    }
+    setShowBookingForm(true);
   };
 
   const roomOptions: RoomOption[] =
@@ -339,7 +370,13 @@ export default function HotelDetail() {
                           <div>
                             <button
                               className="bg-blue-600 text-white px-4 py-2 rounded-full text-xs w-full hover:bg-blue-700 transition flex items-center justify-center"
-                              onClick={() => handleShowDetail(option, rateIdx)}
+                              onClick={() => {
+                                if (!isAuthenticated()) {
+                                  setShowAuthModal(true);
+                                  return;
+                                }
+                                handleShowDetail(option, rateIdx);
+                              }}
                             >
                               <CheckIcon className="w-4 h-4 mr-1" /> Choose
                             </button>
@@ -491,7 +528,7 @@ export default function HotelDetail() {
                   </p>
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition mt-2"
-                    onClick={() => setShowBookingForm(true)}
+                    onClick={handleReserveNow}
                   >
                     Reserve Now
                   </button>
@@ -509,6 +546,12 @@ export default function HotelDetail() {
           onClose={() => setShowBookingForm(false)}
         />
       )}
+
+      <AuthRequiredModal
+        visible={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        returnUrl={window.location.pathname + window.location.search}
+      />
     </div>
     </CustomerLayout>
   );

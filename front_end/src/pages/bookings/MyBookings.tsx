@@ -36,6 +36,9 @@ const MyBookings: React.FC = () => {
   const userName = useSelector(
     (state: RootState) => state.userDataSlice.fullname
   );
+  const email = useSelector(
+    (state: RootState) => state.userDataSlice.email
+  )
 
   const fetchBookings = async () => {
     const token = Cookies.get("token");
@@ -81,10 +84,10 @@ const MyBookings: React.FC = () => {
     }
   };
   useEffect(() => {
-    console.log("check usser id ", userId, "userName", userName);
+    console.log("check usser id ", userId, "userName", userName , "email", email);
 
     fetchBookings();
-  }, [userId]);
+  }, [userId, userName]);
 
   return (
     <CustomerLayout>

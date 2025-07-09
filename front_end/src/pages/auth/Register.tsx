@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff, Facebook, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { CustomerLayout } from "@/layouts/CustomerLayout";
 import Cookies from "js-cookie";
@@ -40,6 +40,8 @@ const Register = () => {
   }>({});
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
 
   const handleSubmit = async () => {
     if (password !== confirmPassword) {
@@ -89,13 +91,14 @@ const Register = () => {
             title: "Success",
             description: "Registration successful. Logging you in...",
           });
+          navigate(returnUrl);
         } else {
           toast({
             title: "Success",
             description: "Registration successful. Please log in.",
           });
 
-          navigate("/login");
+          navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
         }
       }
     } catch (error) {
