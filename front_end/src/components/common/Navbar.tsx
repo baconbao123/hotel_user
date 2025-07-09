@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useSelector } from "react-redux";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,12 +22,13 @@ import {
   ShoppingBag,
   User,
 } from "lucide-react";
-import { Badge as AntdBadge, message } from "antd";
+import { Badge as AntdBadge } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { setUser } from "@/store/slice/userDataSlice";
 import { useDispatch } from "react-redux";
+
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [scrolled, setScrolled] = useState(false);
@@ -49,15 +51,13 @@ const Navbar = () => {
     };
     updateFavCount();
     window.addEventListener("storage", updateFavCount);
-    window.addEventListener("favorite-hotels-changed", updateFavCount as any);
+    window.addEventListener("favorite-hotels-changed", updateFavCount);
     return () => {
       window.removeEventListener("storage", updateFavCount);
-      window.removeEventListener(
-        "favorite-hotels-changed",
-        updateFavCount as any
-      );
+      window.removeEventListener("favorite-hotels-changed", updateFavCount);
     };
   }, []);
+
   const fetchProfile = async () => {
     const token = Cookies.get("token");
     axios
@@ -65,6 +65,7 @@ const Navbar = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
+        setUserProfile(res.data.result);
         dispatch(setUser(res.data.result));
       })
       .catch((err) => {
@@ -140,10 +141,15 @@ const Navbar = () => {
                     className="relative text-white flex items-center gap-2"
                   >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={userProfile.avatar || "/placeholder.svg"}
-                        alt="User"
-                      />
+                     <AvatarImage
+  src={
+    userProfile.avatar
+      ? `http://103.161.172.90:9898/upload/${userProfile.avatar}`
+      : "/placeholder.svg"
+  }
+  alt="User"
+/>
+
                       <AvatarFallback>
                         {userProfile.fullName?.[0] || "U"}
                       </AvatarFallback>
@@ -160,12 +166,6 @@ const Navbar = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate("/user/profile")}>
                     <User className="mr-2 h-4 w-4" /> Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <ShoppingBag className="mr-2 h-4 w-4" /> My Bookings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Heart className="mr-2 h-4 w-4" /> Favorites
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>

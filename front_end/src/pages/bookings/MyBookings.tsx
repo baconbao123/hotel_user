@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { CustomerLayout } from "@/layouts/CustomerLayout";
-// import jwtDecode from 'jwt-decode'; // Correct import
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 interface Booking {
