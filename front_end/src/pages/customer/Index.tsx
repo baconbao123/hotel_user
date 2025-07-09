@@ -1,19 +1,13 @@
 import CustomerLayout from '@/layouts/CustomerLayout';
 import PageWrapper from '@/components/common/PageWrapper';
-import HotelListings from '@/components/customer/HotelListings';
-import HotelSearchForm from '@/components/customer/HotelSearchForm';
+import HotelListings from '@/components/hotelComponent/HotelListings';
+import HotelSearchForm from '@/components/hotelComponent/HotelSearchForm';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const hotels = [
-  // ... giữ nguyên dữ liệu hotels như cũ ...
-];
 
-const popularDestinations = [
-  // ... giữ nguyên dữ liệu popularDestinations như cũ ...
-];
 
 const CustomerHomePage = () => (
   <CustomerLayout>
@@ -52,22 +46,7 @@ const CustomerHomePage = () => (
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularDestinations.map((destination) => (
-              <div
-                key={destination.name}
-                className="relative overflow-hidden rounded-lg shadow-md h-60 group cursor-pointer"
-              >
-                <img
-                  src={destination.imageUrl}
-                  alt={destination.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
-                  <h3 className="text-xl font-bold text-white">{destination.name}</h3>
-                  <p className="text-white text-sm">{destination.hotelCount} hotels</p>
-                </div>
-              </div>
-            ))}
+           
           </div>
         </div>
       </section>
