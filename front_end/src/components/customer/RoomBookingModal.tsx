@@ -46,7 +46,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
       try {
         setLoading(true);
         setError('');
-        const res = await axios.get(`http://localhost:9898/hotel/booking/user/${roomId}?date=${dayjs(date).format('YYYY-MM-DD')}`, {
+        const res = await axios.get(`http://103.161.172.90:9898/hotel/booking/user/${roomId}?date=${dayjs(date).format('YYYY-MM-DD')}`, {
           headers: { Authorization: `Bearer ${TOKEN}` }
         });
         const slots: string[] = [];
@@ -62,7 +62,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
         });
         setBookedSlots(slots);
         setRoomInfo(res.data.roomInfo);
-        console.log('bookedSlots:', slots);
+        // console.log('bookedSlots:', slots);
       } catch (err) {
         setError('Không lấy được giờ đã đặt!');
       } finally {
@@ -253,7 +253,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
                 formData.append('methodId', String(methodId));
                 formData.append('amount', String(amount));
                 formData.append('notePayment', notePayment || '');
-                const res = await axios.post('http://localhost:9898/hotel/booking/user', formData, {
+                const res = await axios.post('http://103.161.172.90:9898/hotel/booking/user', formData, {
                   headers: {
                     Authorization: `Bearer ${token}`
                   }
