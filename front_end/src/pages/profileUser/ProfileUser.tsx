@@ -25,7 +25,7 @@ const ProfilePage = () => {
     const fetchProfile = async () => {
       const token = Cookies.get('token');
       try {
-        const res = await axios.get('http://localhost:9898/hotel/user-profile', {
+        const res = await axios.get('http://103.161.172.90:9898/hotel/user-profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(res.data.result || { fullName: '', email: '', phoneNumber: '', avatar: '' });
@@ -60,7 +60,7 @@ const ProfilePage = () => {
       formData.append('phoneNumber', user.phoneNumber);
       if (user.avatar) formData.append('avatar', user.avatar);
 
-      const res = await axios.put('http://localhost:9898/hotel/user-profile', formData, {
+      const res = await axios.put('http://103.161.172.90:9898/hotel/user-profile', formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
         timeout: 5000,
       });
@@ -92,7 +92,7 @@ const ProfilePage = () => {
 
     try {
       const token = Cookies.get('token');
-      const res = await axios.put('http://localhost:9898/hotel/user-profile/password', {
+      const res = await axios.put('http://103.161.172.90:9898/hotel/user-profile/password', {
         currentPassword: password.current,
         newPassword: password.new,
       }, {

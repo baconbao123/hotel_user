@@ -40,7 +40,7 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:9898/hotel/user/login?email=${email}&password=${password}&remember=${rememberMe}`
+        `http://103.161.172.90:9898/hotel/user/login?email=${email}&password=${password}&remember=${rememberMe}`
       );
 
       if (res.status === 200) {

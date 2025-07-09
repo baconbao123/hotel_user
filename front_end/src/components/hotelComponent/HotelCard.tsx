@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { message } from 'antd';
 
 interface HotelCardProps {
   hotel: {
@@ -33,13 +34,33 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
     amenities,
   } = hotel;
 
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    const favs = JSON.parse(localStorage.getItem('favoriteHotels') || '[]');
+    setIsFavorite(favs.includes(id));
+  }, [id]);
+
+  const toggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    let favs = JSON.parse(localStorage.getItem('favoriteHotels') || '[]');
+    if (favs.includes(id)) {
+      favs = favs.filter((fid: string) => fid !== id);
+      setIsFavorite(false);
+    } else {
+      favs.push(id);
+      setIsFavorite(true);
+      message.success({ content: 'Added to favorites!', duration: 2, style: { bottom: 24, right: 24 } });
+    }
+    localStorage.setItem('favoriteHotels', JSON.stringify(favs));
+    window.dispatchEvent(new Event('favorite-hotels-changed'));
+  };
+
   const discountedPrice = discount
     ? parseInt(pricePerNight.replace(/[^0-9]/g, "")) * (1 - discount / 100)
     : null;
-  // const navigate = useNavigate();
-  // const handleViewDetails = () => {
-
-  // };
+ 
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -60,8 +81,9 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
           variant="ghost"
           size="icon"
           className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-800 rounded-full"
+          onClick={toggleFavorite}
         >
-          <Heart className="h-5 w-5" />
+          <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
         </Button>
       </div>
       <CardContent className="pt-4 flex-grow">

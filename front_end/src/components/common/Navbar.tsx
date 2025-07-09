@@ -11,12 +11,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Bell, Calendar, ChevronDown, Heart, LogIn, LogOut, Search, ShoppingBag, User } from 'lucide-react';
+import { Badge as AntdBadge, message } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(0);
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(!!Cookies.get('token'));
   const [userProfile, setUserProfile] = useState(null);
 
@@ -27,11 +30,25 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    const updateFavCount = () => {
+      const favs = JSON.parse(localStorage.getItem('favoriteHotels') || '[]');
+      setFavoriteCount(favs.length);
+    };
+    updateFavCount();
+    window.addEventListener('storage', updateFavCount);
+    window.addEventListener('favorite-hotels-changed', updateFavCount as any);
+    return () => {
+      window.removeEventListener('storage', updateFavCount);
+      window.removeEventListener('favorite-hotels-changed', updateFavCount as any);
+    };
+  }, []);
+  
+  useEffect(() => {
     const fetchUserProfile = async () => {
       const token = Cookies.get('token');
       if (token) {
         try {
-          const res = await axios.get('http://localhost:9898/hotel/user-profile', {
+          const res = await axios.get('http://103.161.172.90:9898/hotel/user-profile', {
             headers: { 'Authorization': `Bearer ${token}`, 'Accept': '*/*' }
           });
           setUserProfile(res.data.result);
@@ -82,11 +99,13 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <a href="/favorites" className="text-white hidden lg:flex items-center">
-              <Heart className="h-5 w-5 mr-1" />
-              <span>Favorites</span>
-            </a>
-            <a href="/my-bookings" className="text-white hidden lg:flex items-center">
+              
+            <div className="relative cursor-pointer" onClick={() => navigate('/favorites')}>
+              <AntdBadge count={favoriteCount} size="small" offset={[0, 6]}>
+                <Heart className="h-6 w-6 text-white hover:text-shopee transition" />
+              </AntdBadge>
+            </div>
+          <a href="/my-bookings" className="text-white hidden lg:flex items-center">
               <ShoppingBag className="h-5 w-5 mr-1" />
               <span>My Bookings</span>
             </a>
@@ -108,6 +127,12 @@ const Navbar = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => window.location.href = '/user/profile'}>
                     <User className="mr-2 h-4 w-4" /> Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <ShoppingBag className="mr-2 h-4 w-4" /> My Bookings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Heart className="mr-2 h-4 w-4" /> Favorites
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>

@@ -61,7 +61,7 @@ const MyBookings: React.FC = () => {
           return;
         }
 
-        const res = await axios.get(`http://localhost:9898/hotel/booking/user/${userId}/booking`, {
+        const res = await axios.get(`http://103.161.172.90:9898/hotel/booking/user/${userId}/booking`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBookings(res.data || []);

@@ -65,7 +65,7 @@ const Register = () => {
       }
 
       const response = await axios.post(
-        `http://localhost:9898/hotel/user/register`,
+        `http://103.161.172.90:9898/hotel/user/register`,
         formData,
         {
           headers: {
