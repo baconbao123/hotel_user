@@ -63,6 +63,7 @@ interface CommonDataState {
   error?: string;
   hotelDetail: HotelDetail | null;
   roomDetail: RoomDetail | null;
+  hotels?: any[];
 }
 
 const initialState: CommonDataState = {
@@ -70,6 +71,7 @@ const initialState: CommonDataState = {
   status: "idle",
   hotelDetail: null,
   roomDetail: null,
+  hotels: [],
 };
 
 const typeMapping: Record<keyof CommonData, keyof CommonDataResponse> = {
@@ -182,6 +184,9 @@ const commonDataSlice = createSlice({
     clearHotelAndRoom(state) {
       state.hotelDetail = null;
       state.roomDetail = null;
+    },
+    setHotels(state, action: PayloadAction<any[]>) {
+      state.hotels = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -203,5 +208,5 @@ const commonDataSlice = createSlice({
   },
 });
 
-export const { clearCommonData, setHotelDetail, setRoomDetail, clearHotelAndRoom } = commonDataSlice.actions;
+export const { clearCommonData, setHotelDetail, setRoomDetail, clearHotelAndRoom, setHotels } = commonDataSlice.actions;
 export default commonDataSlice.reducer;

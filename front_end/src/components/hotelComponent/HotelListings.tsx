@@ -58,12 +58,7 @@ const HotelListings: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm h-fit sticky top-20">
             <h3 className="text-lg font-semibold mb-4">Filters</h3>
-            <HotelFilters
-              provinces={provinces}
-              facilities={filters?.facilities || []}
-              price={filters?.price}
-              onFilterChange={setFilterState}
-            />
+            <HotelFilters onFilterChange={setFilterState} />
           </div>
           <div className="lg:col-span-3">
             {filteredHotels.length >= 10 ? (
