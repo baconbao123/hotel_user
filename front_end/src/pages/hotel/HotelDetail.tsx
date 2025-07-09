@@ -8,10 +8,13 @@ import {
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import { CheckIcon, UsersIcon } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import "primeicons/primeicons.css"; // Import PrimeIcons CSS
+import CustomerLayout from "@/layouts/CustomerLayout";
+import RoomBookingModal from '@/components/customer/RoomBookingModal';
+import { Modal } from 'antd';
 
 type RoomRate = {
   name: string;
@@ -37,9 +40,11 @@ type RoomOption = {
   bathrooms: string[];
   rates: RoomRate[];
   type: string;
+  roomId: string;
 };
 
 type Room = {
+  id: number;
   name: string;
   description?: string;
   area: number;
@@ -80,6 +85,10 @@ export default function HotelDetail() {
   const [selectedRateIndex, setSelectedRateIndex] = useState<number | null>(null);
   const [selectedRoomIndex, setSelectedRoomIndex] = useState<number | null>(null);
   const [hotelData, setHotelData] = useState<HotelData | null>(null);
+  const navigate = useNavigate();
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedSlot, setSelectedSlot] = useState('');
+
 
   const reviews = [
     { name: "Minh Nguyen", rating: 5, comment: "Clean hotel, friendly staff, great location." },
@@ -88,6 +97,13 @@ export default function HotelDetail() {
   ];
 
   const { hotelId } = useParams<{ hotelId: string }>();
+
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingType, setBookingType] = useState('hour');
+  const [bookingHour, setBookingHour] = useState(1);
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState('');
 
   useEffect(() => {
     const url = `http://localhost:9898/hotel/user/hotel/${hotelId}`;
@@ -152,6 +168,7 @@ export default function HotelDetail() {
           },
         ],
         type: type.name,
+        roomId: room.id.toString(),
       }))
     ) || [];
 
@@ -163,7 +180,18 @@ export default function HotelDetail() {
 
   if (!hotelData) return <p className="text-center mt-10">Loading hotel data...</p>;
 
+  // Giả lập thông tin phòng, bạn có thể lấy từ dữ liệu thực tế
+  const room = hotelData ? {
+    name: hotelData.types?.[0]?.rooms?.[0]?.name || 'Standard Room',
+    imageUrl: hotelData.types?.[0]?.rooms?.[0]?.avatarRoom ? `http://localhost:9898/hotel/upload/hotel/${hotelData.types[0].rooms[0].avatarRoom}` : '/placeholder.jpg',
+    price: hotelData.types?.[0]?.rooms?.[0]?.priceNight || 170000,
+    hotelName: hotelData.hotel.name,
+    address: hotelData.hotel.address
+  } : null;
+
   return (
+    <CustomerLayout>
+
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1">
@@ -451,7 +479,10 @@ export default function HotelDetail() {
                   <p className="text-red-600 font-bold text-lg">
                     {selectedRoom.rates[selectedRateIndex].priceOvernight} / night
                   </p>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition mt-2">
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition mt-2"
+                    onClick={() => setShowBookingForm(true)}
+                  >
                     Reserve Now
                   </button>
                 </div>
@@ -460,6 +491,15 @@ export default function HotelDetail() {
           </div>
         </div>
       )}
+
+      {showBookingForm && selectedRoom && (
+        <RoomBookingModal
+          roomId={selectedRoom.roomId}
+          show={showBookingForm}
+          onClose={() => setShowBookingForm(false)}
+        />
+      )}
     </div>
+    </CustomerLayout>
   );
 }

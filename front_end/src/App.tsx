@@ -10,6 +10,8 @@ import Register from "./pages/auth/Register";
 import NotFound from "./pages/NotFound";
 import HotelDetail from "./pages/hotel/HotelDetail";
 import UserHome from "./pages/user/Home";
+import Booking from './pages/booking/Booking';
+import FavoriteHotels from "./pages/hotel/FavoriteHotels";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +29,8 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/user/home" element={<UserHome />} />
           <Route path="/hotel/:hotelId" element={<HotelDetail />} />
-          
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/favorites" element={<FavoriteHotels/>} />
         
         
           {/* 404 Route */}

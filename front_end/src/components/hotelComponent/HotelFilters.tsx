@@ -28,23 +28,14 @@ interface HotelFiltersProps {
 }
 
 export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: HotelFiltersProps) => {
-  // Giả lập dữ liệu nếu không có
-  const fallbackProvinces = [
-    { code: '01', name: 'Hà Nội' },
-    { code: '02', name: 'Hồ Chí Minh' },
-    { code: '03', name: 'Đà Nẵng' },
-  ];
-  const fallbackFacilities = [
-    { id: 1, name: 'WiFi', icon: 'fa fa-wifi' },
-    { id: 2, name: 'Pool', icon: 'fa fa-swimming-pool' },
-    { id: 3, name: 'Parking', icon: 'fa fa-parking' },
-  ];
-  const fallbackPrice = { min: 0, max: 1000 };
+  // Lấy giá min/max từ prop price nếu có, nếu không thì dùng fallback
+  const minPrice = price?.min;
+  const maxPrice = price?.max;
 
   const [selectedProvince, setSelectedProvince] = useState('');
   const [priceRange, setPriceRange] = useState([
-    price?.min ?? fallbackPrice.min,
-    price?.max ?? fallbackPrice.max,
+    minPrice,
+    maxPrice,
   ]);
   const [selectedStars, setSelectedStars] = useState<number[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
@@ -66,7 +57,7 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
 
   const handleClearFilters = () => {
     setSelectedProvince('');
-    setPriceRange([price?.min ?? fallbackPrice.min, price?.max ?? fallbackPrice.max]);
+    setPriceRange([minPrice, maxPrice]);
     setSelectedStars([]);
     setSelectedAmenities([]);
   };
@@ -105,7 +96,7 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
             onChange={e => setSelectedProvince(e.target.value)}
           >
             <option value="">Tất cả</option>
-            {(provinces?.length ? provinces : fallbackProvinces).map((p) => (
+            {provinces?.map((p) => (
               <option key={p.code} value={p.name}>{p.name}</option>
             ))}
           </select>
@@ -115,8 +106,8 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
           <h3 className="font-medium mb-4">Price Range</h3>
           <Slider
             value={priceRange}
-            min={price?.min ?? fallbackPrice.min}
-            max={price?.max ?? fallbackPrice.max}
+            min={minPrice}
+            max={maxPrice}
             step={10}
             onValueChange={setPriceRange}
             className="mb-2"
@@ -146,7 +137,7 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
         <div>
           <h3 className="font-medium mb-4">Amenities</h3>
           <div className="space-y-2">
-            {(facilities?.length ? facilities : fallbackFacilities).map((f) => (
+            {facilities?.map((f) => (
               <div key={f.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`amenity-${f.id}`}
