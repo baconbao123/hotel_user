@@ -38,7 +38,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
 
   const fetchProfile = async () => {
     const token = Cookies.get("token");
@@ -108,7 +108,7 @@ const ProfilePage = () => {
           title: "Success",
           description: "Profile updated successfully.",
         });
-        navigate("/user/home");
+        navigate("/");
       }
     } catch (error) {
       if (error.response?.status === 422)
