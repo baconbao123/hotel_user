@@ -62,7 +62,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({ roomId, show, onClo
         });
         setBookedSlots(slots);
         setRoomInfo(res.data.roomInfo);
-        console.log('bookedSlots:', slots);
+        // console.log('bookedSlots:', slots);
       } catch (err) {
         setError('Không lấy được giờ đã đặt!');
       } finally {

@@ -29,12 +29,12 @@ const HotelListings: React.FC = () => {
   });
 
   // Thêm log để kiểm tra dữ liệu
-  console.log('hotelsRaw:', hotelsRaw);
-  console.log('hotels:', hotels);
-  console.log('provinces:', provinces);
-  console.log('filters:', filters);
-  console.log('filteredHotels:', filteredHotels);
-  console.log('filterState:', filterState);
+  // console.log('hotelsRaw:', hotelsRaw);
+  // console.log('hotels:', hotels);
+  // console.log('provinces:', provinces);
+  // console.log('filters:', filters);
+  // console.log('filteredHotels:', filteredHotels);
+  // console.log('filterState:', filterState);
 
   const baseHotelImg = import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL;
 

@@ -21,7 +21,7 @@ apiClient.interceptors.request.use(
     
     // Log requests in development mode
     if (API_CONFIG.ENABLE_LOGGING) {
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
+      // console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
     }
     
     return config;
@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
   (response) => {
     // Log responses in development mode
     if (API_CONFIG.ENABLE_LOGGING) {
-      console.log(`[API Response] ${response.status} ${response.config.url}`);
+      // console.log(`[API Response] ${response.status} ${response.config.url}`);
     }
     return response;
   },
@@ -45,11 +45,11 @@ apiClient.interceptors.response.use(
         console.error(`[API Error] ${error.response.status} ${error.config?.url}`, error.response.data);
       }
       
-      if (error.response.status === 401) {
-        // Handle unauthorized (e.g., redirect to login)
-        localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY);
-        window.location.href = '/login';
-      }
+      // if (error.response.status === 401) {
+      //   // Handle unauthorized (e.g., redirect to login)
+      //   localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY);
+      //   window.location.href = '/login';
+      // }
     }
     return Promise.reject(error);
   }

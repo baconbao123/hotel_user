@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { CustomerLayout } from '@/layouts/CustomerLayout';
-// import jwtDecode from 'jwt-decode'; // Correct import
-
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { CustomerLayout } from "@/layouts/CustomerLayout";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 interface Booking {
   id: number;
   userId: number;
@@ -32,58 +32,68 @@ const MyBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
+  const userId = useSelector((state: RootState) => state.userDataSlice.id);
+  const userName = useSelector(
+    (state: RootState) => state.userDataSlice.fullname
+  );
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      const token = Cookies.get('token');
-      if (!token) {
+  const fetchBookings = async () => {
+    const token = Cookies.get("token");
+    if (!token && userId) {
+      toast({
+        title: "Error",
+        description: "No authentication token found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Decode token to get userId with error handling
+      try {
+        // const decoded: DecodedToken = jwtDecode(token) as DecodedToken; // Type assertion
+        // userId = decoded.userId;
+      } catch (decodeError) {
         toast({
-          title: 'Error',
-          description: 'No authentication token found.',
-          variant: 'destructive',
+          title: "Error",
+          description: "Invalid authentication token.",
+          variant: "destructive",
         });
         return;
       }
 
-      setIsLoading(true);
-      try {
-        // Decode token to get userId with error handling
-        let userId: number;
-        try {
-          // const decoded: DecodedToken = jwtDecode(token) as DecodedToken; // Type assertion
-          // userId = decoded.userId;
-        } catch (decodeError) {
-          toast({
-            title: 'Error',
-            description: 'Invalid authentication token.',
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        const res = await axios.get(`http://103.161.172.90:9898/hotel/booking/user/${userId}/booking`, {
+      const res = await axios.get(
+        `http://103.161.172.90:9898/hotel/booking/user/${userId}/booking`,
+        {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        setBookings(res.data || []);
-      } catch (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch bookings. Please try again.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        }
+      );
+      setBookings(res.data || []);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch bookings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    console.log("check usser id ", userId, "userName", userName);
+
     fetchBookings();
-  }, [toast]);
+  }, [userId]);
 
   return (
     <CustomerLayout>
       <div className="min-h-[80vh] py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <Card className="w-full max-w-4xl mx-auto shadow-sm border-gray-100">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-gray-900">My Bookings</CardTitle>
+            <CardTitle className="text-2xl font-semibold text-gray-900">
+              My Bookings
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -130,30 +140,30 @@ const MyBookings: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">
-                          <strong>Check In:</strong>{' '}
+                          <strong>Check In:</strong>{" "}
                           {new Date(booking.checkInTime).toLocaleString()}
                         </p>
                         <p className="text-sm font-medium text-gray-600">
-                          <strong>Check Out:</strong>{' '}
+                          <strong>Check Out:</strong>{" "}
                           {new Date(booking.checkOutTime).toLocaleString()}
                         </p>
                         <p className="text-sm font-medium text-gray-600">
-                          <strong>Status:</strong>{' '}
+                          <strong>Status:</strong>{" "}
                           <span
                             className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
                               booking.status
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {booking.status ? 'Active' : 'Inactive'}
+                            {booking.status ? "Active" : "Inactive"}
                           </span>
                         </p>
                       </div>
                     </div>
                     <div className="mt-4">
                       <p className="text-sm font-medium text-gray-600">
-                        <strong>Created At:</strong>{' '}
+                        <strong>Created At:</strong>{" "}
                         {new Date(booking.createdAt).toLocaleString()}
                       </p>
                       {booking.note && (
