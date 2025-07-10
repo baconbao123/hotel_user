@@ -150,7 +150,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
         setLoading(true);
         setError("");
         const res = await axios.get(
-          `http://103.161.172.90:9898/hotel/booking/user/${roomId}?date=${dayjs(
+          `http://localhost:9898/hotel/booking/user/${roomId}?date=${dayjs(
             form.date
           )
             .tz()
@@ -243,6 +243,22 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
   };
 
   const handleBooking = async () => {
+    let hotelId = hotelDetail?.id;
+    if (!hotelId) {
+      for (const hotel of hotels) {
+        for (const type of hotel.types || []) {
+          const foundRoom = (type.rooms || []).find(
+            (r: any) => String(r.id) === String(roomId)
+          );
+          if (foundRoom) {
+            hotelId = hotel.id;
+            break;
+          }
+        }
+        if (hotelId) break;
+      }
+    }
+
     if (!userName || !email || !phoneNumber) {
       setError("Please provide your name, email, and phone number.");
       return;
@@ -287,7 +303,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
       formData.append("notePayment", form.notePayment || "");
 
       const res = await axios.post(
-        "http://103.161.172.90:9898/hotel/booking/user",
+        "http://localhost:9898/hotel/booking/user",
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -329,19 +345,23 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
 
       if (form.methodId === 1) {
         if (form.amount && form.amount > 0) {
-          console.log("Navigating with amount:", form.amount); // Debug
+          console.log(
+            "Navigating with amount:",
+            form.amount,
+            "hotelId:",
+            hotelId
+          ); // Debug
           navigate(
             `/payment/pay?amount=${form.amount}&txnRef=${encodeURIComponent(
               txnRef
-            )}`,
-            { state: { amount: form.amount, txnRef } } 
+            )}&hotelId=${hotelId}`,
+            { state: { amount: form.amount, txnRef, hotelId } } // Thêm hotelId vào state
           );
         } else {
           setError("Invalid amount for payment!");
         }
         return;
       }
-
       setBillData(bill);
       setShowBill(true);
     } catch (err: any) {
