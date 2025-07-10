@@ -7,29 +7,38 @@ const Payment = () => {
   const navigate = useNavigate();
   const query = new URLSearchParams(location.search);
   const initialAmount =
-    Number(query.get("amount")) || location.state?.amount || 0; // Bỏ fallback 10000
+    Number(query.get("amount")) || location.state?.amount || 0;
   const initialTxnRef = query.get("txnRef") || `ORDER_${Date.now()}`;
+  const initialHotelId =
+    Number(query.get("hotelId")) || location.state?.hotelId || 0; // Lấy hotelId
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [amount, setAmount] = useState(initialAmount);
   const [txnRef, setTxnRef] = useState(initialTxnRef);
+  const [hotelId] = useState(initialHotelId); // Lưu hotelId
 
   useEffect(() => {
-    console.log("Payment state:", location.state); // Debug state
-    console.log("Payment query amount:", query.get("amount")); // Debug query
+    console.log("Payment state:", location.state);
+    console.log("Payment query:", {
+      amount: query.get("amount"),
+      hotelId: query.get("hotelId"),
+    });
     if (!initialAmount) {
       setError("Amount is missing! Please go back and try again.");
     }
+    if (!initialHotelId) {
+      setError("Hotel ID is missing! Please go back and try again.");
+    }
     setAmount(initialAmount);
     setTxnRef(initialTxnRef);
-  }, [initialAmount, initialTxnRef]);
+  }, [initialAmount, initialTxnRef, initialHotelId]);
 
   const handlePayment = async () => {
     setLoading(true);
     setError("");
     try {
-      if (!amount || amount < 1) {
+      if (!amount || amount < 1000) {
         setError("Minimum amount is 1,000 VND!");
         return;
       }
@@ -41,11 +50,15 @@ const Payment = () => {
         setError("Invalid transaction reference!");
         return;
       }
+      if (!hotelId) {
+        setError("Invalid hotel ID!");
+        return;
+      }
 
       const response = await axios.get(
-        `http://103.161.172.90:9898/hotel/payment/pay?amount=${amount}&txnRef=${encodeURIComponent(
+        `http://localhost:9898/hotel/payment/pay?amount=${amount}&txnRef=${encodeURIComponent(
           txnRef
-        )}`,
+        )}&hotelId=${hotelId}`,
         { headers: { "Content-Type": "application/json" } }
       );
 
@@ -63,6 +76,7 @@ const Payment = () => {
   };
 
   return (
+    // ... (giữ nguyên phần JSX, thêm hotelId vào UI nếu cần)
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
         <div className="flex items-center justify-center mb-6">
@@ -85,10 +99,10 @@ const Payment = () => {
             onChange={(e) => setAmount(Number(e.target.value) || initialAmount)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF6600] disabled:bg-gray-100"
             placeholder="Enter amount"
-            disabled={loading || !!initialAmount} // Khóa input nếu có initialAmount
+            disabled={loading || !!initialAmount}
           />
         </div>
-        <div className="mb-6">
+        <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Transaction Reference
           </label>
@@ -100,6 +114,17 @@ const Payment = () => {
             placeholder="Enter transaction reference"
             disabled={loading || !!initialTxnRef}
           />
+        </div>
+        <div className="mb-6">
+          {/* <label className="block text-sm font-medium text-gray-700 mb-1">
+            Hotel ID
+          </label> */}
+          {/* <input
+            type="text"
+            value={hotelId || ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+            disabled
+          /> */}
         </div>
         <button
           onClick={handlePayment}
