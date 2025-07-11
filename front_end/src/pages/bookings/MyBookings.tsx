@@ -7,7 +7,7 @@ import { CustomerLayout } from "@/layouts/CustomerLayout";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setHotels } from '@/store/slice/commonDataSlice';
-import { Modal, Descriptions, Result } from 'antd';
+import { Modal, Descriptions, Result, Rate, Input } from 'antd';
 import { Button } from "@/components/ui/button";
 
 interface Booking {
@@ -37,7 +37,9 @@ const MyBookings: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
   const userId = useSelector((state: RootState) => state.userDataSlice.id);
-  const userName = useSelector((state: RootState) => state.userDataSlice.fullname);
+  // Lấy userName an toàn
+  const userNameRedux = useSelector((state: RootState) => state.userDataSlice.fullname);
+  const userName = userNameRedux || localStorage.getItem('userName') || 'User';
   const email = useSelector((state: RootState) => state.userDataSlice.email);
   const phoneNumber = useSelector((state: RootState) => state.userDataSlice.phoneNumber);
   const avatarUrl = useSelector((state: RootState) => state.userDataSlice.avatarUrl);
@@ -48,6 +50,12 @@ const MyBookings: React.FC = () => {
   const [showBill, setShowBill] = useState(false);
   const [billData, setBillData] = useState<any>(null);
   const billRef = useRef<HTMLDivElement>(null);
+  const { TextArea } = Input;
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [rating, setRating] = useState<number>(0);
+  const [comment, setComment] = useState<string>('');
+  const [reviews, setReviews] = useState<any[]>([]);
 
   const getHotelByRoomId = (roomId: number) => {
     for (const hotel of hotels) {
@@ -58,6 +66,18 @@ const MyBookings: React.FC = () => {
     return null;
   };
 
+  // Thêm hàm lấy hotelId từ roomId
+  const getHotelIdByRoomId = (roomId: number) => {
+    // Ưu tiên lấy từ hotels
+    const hotel = getHotelByRoomId(roomId);
+    if (hotel) return hotel.id;
+    // Nếu không có, lấy từ hotelDetailsMap
+    const hotelDetailObj = hotelDetailsMap[roomId];
+    const hotelObj = hotelDetailObj?.result?.hotel || hotelDetailObj?.hotel;
+    if (hotelObj) return hotelObj.id;
+    return null;
+  };
+
   const handleCancelBooking = async (bookingId: number) => {
     const token = Cookies.get("token");
     if (!token) {
@@ -65,7 +85,7 @@ const MyBookings: React.FC = () => {
       return;
     }
     try {
-      await axios.post(`http://103.161.172.90:9898/hotel/booking/user/cancel/${bookingId}`, {}, {
+      await axios.post(`http://localhost:9898/hotel/booking/user/cancel/${bookingId}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast({ title: "Success", description: "Booking cancelled successfully." });
@@ -122,7 +142,7 @@ const MyBookings: React.FC = () => {
   const fetchHotelsIfNeeded = async () => {
     if (!hotels || hotels.length === 0) {
       try {
-        const res = await axios.get('http://103.161.172.90:9898/hotel/user/home?page=0');
+        const res = await axios.get('http://localhost:9898/hotel/user/home?page=0');
         const hotelsArray = res.data?.result?.hotels?.content || [];
         dispatch(setHotels(hotelsArray));
       } catch (e) {
@@ -133,7 +153,7 @@ const MyBookings: React.FC = () => {
 
   const fetchHotelDetailByRoomId = async (roomId: number) => {
     try {
-      const res = await axios.get(`http://103.161.172.90:9898/hotel/room/${roomId}`);
+      const res = await axios.get(`http://localhost:9898/hotel/user/hotel/${roomId}`);
       console.log('API /hotel/room/', roomId, res.data);
       setHotelDetailsMap(prev => ({ ...prev, [roomId]: res.data }));
     } catch (e) {
@@ -161,13 +181,36 @@ const MyBookings: React.FC = () => {
     // eslint-disable-next-line
   }, [bookings, hotels, hotelDetailsMap]);
 
+  // Load reviews from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('hotel_reviews');
+    if (stored) {
+      setReviews(JSON.parse(stored));
+    }
+  }, []);
+
+  // Save reviews to localStorage when reviews change
+  useEffect(() => {
+    localStorage.setItem('hotel_reviews', JSON.stringify(reviews));
+  }, [reviews]);
+
   const handleViewBill = () => {
     const hotelDetailObj = hotelDetailsMap[bookings[0].roomId];
     const hotelObj = hotelDetailObj?.result?.hotel || hotelDetailObj?.hotel;
-    const roomObj = hotelDetailObj?.result?.room || hotelDetailObj?.room;
+    const roomObj = (() => {
+      if (hotelDetailObj?.result?.types) {
+        for (const type of hotelDetailObj.result.types) {
+          const found = type.rooms.find((room: any) => room.id === bookings[0].roomId);
+          if (found) return found;
+        }
+      }
+      return null;
+    })();
+    const room = hotelObj?.rooms?.find((room: any) => room.id === bookings[0].roomId);
+    const roomName = roomObj?.name || room?.name || 'Unknown Room';
+
     const hotelName = hotelObj?.name || getHotelByRoomId(bookings[0].roomId)?.name || '';
     const hotelAddress = hotelObj?.address || getHotelByRoomId(bookings[0].roomId)?.address || '';
-    const roomName = roomObj?.name || getHotelByRoomId(bookings[0].roomId)?.rooms?.find((room: any) => room.id === bookings[0].roomId)?.name || '';
 
     setBillData({
       bookingId: bookings[0].id,
@@ -188,6 +231,50 @@ const MyBookings: React.FC = () => {
       hotelAddress,
     });
     setShowBill(true);
+  };
+
+  const handleOpenReview = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setShowReviewModal(true);
+    setRating(0);
+    setComment('');
+  };
+
+  const handleSubmitReview = () => {
+    if (!selectedBooking) return;
+    const hotelId = getHotelIdByRoomId(selectedBooking.roomId);
+    if (!hotelId) {
+      toast({ title: "Lỗi", description: "Không tìm thấy thông tin khách sạn!", variant: "destructive" });
+      return;
+    }
+    // Lấy roomName
+    let hotel = getHotelByRoomId(selectedBooking.roomId);
+    let room = hotel?.rooms?.find((room: any) => room.id === selectedBooking.roomId);
+    let hotelObj: any = null;
+    let roomObj: any = null;
+    if (hotelDetailsMap[selectedBooking.roomId]?.result) {
+      hotelObj = hotelDetailsMap[selectedBooking.roomId].result.hotel;
+      for (const type of hotelDetailsMap[selectedBooking.roomId].result.types) {
+        const found = type.rooms.find((room: any) => room.id === selectedBooking.roomId);
+        if (found) {
+          roomObj = found;
+          break;
+        }
+      }
+    }
+    const roomName = roomObj?.name || room?.name || 'Unknown Room';
+    const newReview = {
+      bookingId: selectedBooking.id,
+      hotelId,
+      roomName,
+      rating,
+      comment,
+      createdAt: new Date().toISOString(),
+      userId: userId,
+      userName: userName,
+    };
+    setReviews(prev => [...prev.filter(r => r.bookingId !== selectedBooking.id), newReview]);
+    setShowReviewModal(false);
   };
 
   return (
@@ -228,18 +315,28 @@ const MyBookings: React.FC = () => {
                 {bookings.map((booking) => {
                   let hotel = getHotelByRoomId(booking.roomId);
                   let room = hotel?.rooms?.find((room: any) => room.id === booking.roomId);
+                  let hotelObj: any = null;
+                  let roomObj: any = null;
 
-                  if (!hotel && hotelDetailsMap[booking.roomId]) {
-                    hotel = hotelDetailsMap[booking.roomId].hotel;
-                    room = hotelDetailsMap[booking.roomId].room;
+                  if (hotelDetailsMap[booking.roomId]?.result) {
+                    hotelObj = hotelDetailsMap[booking.roomId].result.hotel;
+                    for (const type of hotelDetailsMap[booking.roomId].result.types) {
+                      const found = type.rooms.find((room: any) => room.id === booking.roomId);
+                      if (found) {
+                        roomObj = found;
+                        break;
+                      }
+                    }
                   }
 
-                  const hotelDetailObj = hotelDetailsMap[booking.roomId];
-                  const hotelObj = hotelDetailObj?.result?.hotel || hotelDetailObj?.hotel;
-                  const roomObj = hotelDetailObj?.result?.room || hotelDetailObj?.room;
                   const hotelName = hotelObj?.name || hotel?.name || '';
                   const hotelAddress = hotelObj?.address || hotel?.address || '';
-                  const roomName = roomObj?.name || room?.name || '';
+                  const hotelAvatar = hotelObj?.avatar || hotel?.avatar || '';
+                  const roomName = roomObj?.name || room?.name || 'Unknown Room';
+
+                  // Sau khi tìm roomObj
+                  console.log('DEBUG booking.roomId:', booking.roomId);
+                  console.log('DEBUG roomObj:', roomObj);
 
                   const handleViewBill = () => {
                     setBillData({
@@ -263,19 +360,28 @@ const MyBookings: React.FC = () => {
                     setShowBill(true);
                   };
 
+                  const review = reviews.find(r => r.bookingId === booking.id);
+                  const isCheckedOut = new Date(booking.checkOutTime) < new Date();
+
+                  // Thêm log để kiểm tra hotel và hotel.avatarUrl
+                  if (hotel) {
+                    console.log('hotel:', hotel);
+                    console.log('hotel.avatarUrl:', hotel.avatarUrl);
+                  }
+
                   return (
                     <div key={booking.id} className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
                       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                         <div className="flex items-center gap-4">
-                          {hotel?.avatarUrl ? (
-                            <img src={hotel.avatarUrl.startsWith('http') ? hotel.avatarUrl : `${import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL}/${hotel.avatarUrl}`} alt="hotel avatar" className="w-14 h-14 rounded object-cover border" />
+                          {hotelAvatar ? (
+                            <img src={hotelAvatar.startsWith('http') ? hotelAvatar : `${import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL}/${hotelAvatar}`} alt="hotel avatar" className="w-14 h-14 rounded object-cover border" />
                           ) : (
                             <div className="w-14 h-14 rounded bg-gray-200 flex items-center justify-center text-gray-400">No Image</div>
                           )}
                           <div>
-                            <div className="font-semibold text-base">{hotel?.name || 'Unknown Hotel'}</div>
-                            <div className="text-sm text-gray-700">{hotel?.address || 'No address'}</div>
-                            {room && <div className="text-sm text-gray-500">Room: {room.name}</div>}
+                            <div className="font-semibold text-base">{hotelName || 'Unknown Hotel'}</div>
+                            <div className="text-sm text-gray-700">{hotelAddress || 'No address'}</div>
+                            {roomName && <div className="text-sm text-gray-500">Room: {roomName}</div>}
                             {!hotel && <div className="text-xs text-red-500">Hotel info not found</div>}
                           </div>
                         </div>
@@ -315,6 +421,23 @@ const MyBookings: React.FC = () => {
                         >
                           View Bill
                         </button>
+                        {!review && (
+                          <button
+                            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition ml-2"
+                            onClick={() => handleOpenReview(booking)}
+                          >
+                            Review Hotel
+                          </button>
+                        )}
+                        {review && (
+                          <div className="ml-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-700">Your review:</span>
+                              <Rate disabled value={review.rating} />
+                            </div>
+                            {review.comment && <div className="text-gray-600 italic mt-1">"{review.comment}"</div>}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -352,6 +475,28 @@ const MyBookings: React.FC = () => {
           </div>
           <div className="flex justify-center mt-6 gap-3">
             <Button onClick={() => setShowBill(false)} style={{ borderColor: '#FF6600', color: '#FF6600' }}>Close</Button>
+          </div>
+        </Modal>
+        {/* Modal Review */}
+        <Modal
+          open={showReviewModal}
+          onCancel={() => setShowReviewModal(false)}
+          onOk={handleSubmitReview}
+          okText="Submit Review"
+          cancelText="Cancel"
+          width={400}
+          centered
+        >
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Review Hotel</h3>
+            <div className="mb-3">
+              <span className="block mb-1">Select rating:</span>
+              <Rate value={rating} onChange={setRating} />
+            </div>
+            <div className="mb-3">
+              <span className="block mb-1">Comment:</span>
+              <TextArea rows={3} value={comment} onChange={e => setComment(e.target.value)} placeholder="Your comment..." />
+            </div>
           </div>
         </Modal>
       </div>

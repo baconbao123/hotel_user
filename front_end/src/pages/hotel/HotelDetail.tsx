@@ -19,6 +19,7 @@ import { isAuthenticated } from "@/lib/utils";
 import AuthRequiredModal from '@/components/common/AuthRequiredModal';
 import { useDispatch } from 'react-redux';
 import { setHotelDetail, setRoomDetail } from '@/store/slice/commonDataSlice';
+import { Rate } from 'antd';
 
 type RoomRate = {
   name: string;
@@ -126,6 +127,13 @@ export default function HotelDetail() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const dispatch = useDispatch();
+
+  const [localReviews, setLocalReviews] = useState<any[]>([]);
+  useEffect(() => {
+    const stored = localStorage.getItem('hotel_reviews');
+    if (stored) setLocalReviews(JSON.parse(stored));
+  }, []);
+  const hotelReviews = localReviews.filter(r => String(r.hotelId) === String(hotelId));
 
   useEffect(() => {
     const url = `http://localhost:9898/hotel/user/hotel/${hotelId}`;
@@ -247,6 +255,17 @@ export default function HotelDetail() {
         address: hotelData.hotel.address,
       }
     : null;
+
+  // Tính tổng điểm trung bình và số lượng review
+  const totalReviews = hotelReviews.length;
+  const averageRating = totalReviews > 0 ? (hotelReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews).toFixed(1) : null;
+
+  // Thêm hàm maskName ở đầu component
+  const maskName = (name: string) => {
+    if (!name) return "";
+    if (name.length <= 2) return name[0] + "*";
+    return name[0] + "*".repeat(name.length - 2) + name[name.length - 1];
+  };
 
   return (
     <CustomerLayout>
@@ -465,17 +484,44 @@ export default function HotelDetail() {
           </div>
         </div>
 
-        <div ref={reviewsRef} className="mt-10">
-          <h2 className="text-xl font-bold mb-4">Guest Reviews</h2>
-          {reviews.map((r, idx) => (
-            <div key={idx} className="mb-3">
-              <p className="font-medium">
-                {r.name} ({"⭐".repeat(r.rating)}):
-              </p>
-              <p className="text-gray-700">{r.comment}</p>
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
+            <span>Reviews</span>
+            {totalReviews > 0 && (
+              <span className="flex items-center bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-lg font-semibold ml-4 shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" className="w-6 h-6 mr-1 text-orange-500"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.454a1 1 0 00-1.175 0l-3.38 2.454c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" /></svg>
+                {averageRating} <span className="ml-1 text-base font-normal">/ 5</span>
+              </span>
+            )}
+            <span className="ml-4 text-gray-500 text-base">{totalReviews} review{totalReviews !== 1 ? 's' : ''}</span>
+          </h2>
+          {hotelReviews.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-4">
+              {hotelReviews.map((review, idx) => (
+                <div key={idx} className="flex gap-4 items-start mb-6 border rounded-xl p-4 bg-white shadow hover:shadow-lg transition-all">
+                  <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-2xl font-bold text-orange-700">
+                    {review.userName ? review.userName[0].toUpperCase() : "U"}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap gap-4 items-center mb-1">
+                      <span className="text-gray-500">{review.createdAt && new Date(review.createdAt).toLocaleDateString("en-US")}</span>
+                      <span className="font-semibold">Customer: {maskName(review.userName)}</span>
+                      <span className="font-semibold">Room: {review.roomName}</span>
+                      <span className="flex items-center gap-1">
+                        Rating: <Rate disabled value={review.rating} />
+                      </span>
+                    </div>
+                    <div className="text-gray-800">{review.comment}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          ) : (
+            <div className="text-gray-500">No reviews yet.</div>
+          )}
         </div>
+
+        
 
         <div ref={policyRef} className="mt-10">
           <h2 className="text-xl font-bold mb-4">Hotel Policies</h2>

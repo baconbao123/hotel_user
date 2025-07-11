@@ -88,6 +88,14 @@ export const HotelFilters = (props: HotelFiltersProps) => {
 
   if (loading && !provinces?.length && !facilities?.length) return <div>Loading filters...</div>;
 
+  // Lọc unique các tỉnh thành theo tên
+  const uniqueProvinces = provinces
+    ? provinces.filter(
+        (p, idx, arr) =>
+          arr.findIndex(x => x.name.trim().toLowerCase() === p.name.trim().toLowerCase()) === idx
+      )
+    : [];
+
   return (
     <>
       <div className="md:hidden mb-4">
@@ -110,7 +118,7 @@ export const HotelFilters = (props: HotelFiltersProps) => {
             onChange={e => setSelectedProvince(e.target.value)}
           >
             <option value="">All</option>
-            {provinces?.map((p) => (
+            {uniqueProvinces.map((p) => (
               <option key={p.code} value={p.name}>{p.name}</option>
             ))}
           </select>
