@@ -398,8 +398,8 @@ const MyBookings: React.FC = () => {
                           <p className="text-sm font-medium text-gray-600"><strong>Payment ID:</strong> {booking.paymentId}</p>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-600"><strong>Check In:</strong> {new Date(booking.checkInTime).toLocaleString()}</p>
-                          <p className="text-sm font-medium text-gray-600"><strong>Check Out:</strong> {new Date(booking.checkOutTime).toLocaleString()}</p>
+                          <p className="text-sm font-medium text-gray-600"><strong>Check In:</strong> {new Date(booking.checkInTime).toLocaleDateString()} 14:00</p>
+                          <p className="text-sm font-medium text-gray-600"><strong>Check Out:</strong> {new Date(booking.checkOutTime).toLocaleDateString()} 12:00</p>
                           <p className="text-sm font-medium text-gray-600">
                             <strong>Status:</strong>
                             <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${booking.status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
@@ -466,8 +466,12 @@ const MyBookings: React.FC = () => {
               <Descriptions.Item label="Email">{billData?.guest?.email}</Descriptions.Item>
               <Descriptions.Item label="Phone">{billData?.guest?.phoneNumber}</Descriptions.Item>
               <Descriptions.Item label="Room ID">{billData?.roomId}</Descriptions.Item>
-              <Descriptions.Item label="Check-in">{billData?.checkInTime}</Descriptions.Item>
-              <Descriptions.Item label="Check-out">{billData?.checkOutTime}</Descriptions.Item>
+              <Descriptions.Item label="Check-in">
+                {billData?.checkInTime ? new Date(billData.checkInTime).toLocaleDateString() + " 14:00" : ""}
+              </Descriptions.Item>
+              <Descriptions.Item label="Check-out">
+                {billData?.checkOutTime ? new Date(billData.checkOutTime).toLocaleDateString() + " 12:00" : ""}
+              </Descriptions.Item>
               <Descriptions.Item label="Amount">{billData?.amount?.toLocaleString()}₫</Descriptions.Item>
               <Descriptions.Item label="Payment Method">{billData?.method}</Descriptions.Item>
               {billData?.note && <Descriptions.Item label="Note">{billData?.note}</Descriptions.Item>}

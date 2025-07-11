@@ -191,24 +191,27 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
     updateForm({ amount: newAmount });
   }, [roomInfo, form.hours, bookingMode]);
 
-  const checkInTime =
-    form.date && form.selectedHour
-      ? dayjs(form.date)
-          .tz()
-          .hour(Number(form.selectedHour.split(":")[0]))
-          .minute(0)
-          .second(0)
-          .format("YYYY-MM-DDTHH:mm")
-      : "";
+  // Tính checkInTime/checkOutTime cho từng mode
+  const checkInTime = bookingMode === "overnight"
+    ? form.date
+      ? dayjs(form.date).tz().hour(14).minute(0).second(0).format("YYYY-MM-DDTHH:mm")
+      : ""
+    : (form.date && form.selectedHour
+      ? dayjs(form.date).tz().hour(Number(form.selectedHour.split(":")[0])).minute(0).second(0).format("YYYY-MM-DDTHH:mm")
+      : "");
 
-  const checkOutTime = (() => {
-    if (!form.date || !form.selectedHour) return "";
-    const start = Number(form.selectedHour.split(":")[0]);
-    const end = (start + form.hours) % 24;
-    let d = dayjs(form.date).tz().hour(end).minute(0).second(0);
-    if (end <= start) d = d.add(1, "day");
-    return d.format("YYYY-MM-DDTHH:mm");
-  })();
+  const checkOutTime = bookingMode === "overnight"
+    ? form.date
+      ? dayjs(form.date).tz().add(1, "day").hour(12).minute(0).second(0).format("YYYY-MM-DDTHH:mm")
+      : ""
+    : (() => {
+        if (!form.date || !form.selectedHour) return "";
+        const start = Number(form.selectedHour.split(":")[0]);
+        const end = (start + form.hours) % 24;
+        let d = dayjs(form.date).tz().hour(end).minute(0).second(0);
+        if (end <= start) d = d.add(1, "day");
+        return d.format("YYYY-MM-DDTHH:mm");
+      })();
 
   const isHourDisabled = (hour: string) => {
     const start = Number(hour.split(":")[0]);
@@ -267,7 +270,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
       setError("Please select a date.");
       return;
     }
-    if (!form.selectedHour) {
+    if (bookingMode === "hourly" && !form.selectedHour) {
       setError("Please select a start hour.");
       return;
     }
@@ -450,34 +453,36 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
                 />
               </div>
             )}
-            <div className="mb-4">
-              <label className="block font-medium mb-1">
-                Select Start Hour
-              </label>
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
-                {hoursList.map((hour) => (
-                  <button
-                    key={hour}
-                    type="button"
-                    disabled={isHourDisabled(hour)}
-                    className={
-                      `rounded-lg px-0 py-2 w-full text-base font-semibold transition-all ` +
-                      (form.selectedHour === hour
-                        ? "bg-cyan-600 text-white "
-                        : isHourInRange(hour) && form.selectedHour
-                        ? "bg-cyan-200 text-cyan-900 "
-                        : "bg-gray-100 text-gray-700 hover:bg-cyan-100") +
-                      (isHourDisabled(hour)
-                        ? " opacity-50 cursor-not-allowed"
-                        : "")
-                    }
-                    onClick={() => updateForm({ selectedHour: hour })}
-                  >
-                    {hour}
-                  </button>
-                ))}
+            {bookingMode === "hourly" && (
+              <div className="mb-4">
+                <label className="block font-medium mb-1">
+                  Select Start Hour
+                </label>
+                <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                  {hoursList.map((hour) => (
+                    <button
+                      key={hour}
+                      type="button"
+                      disabled={isHourDisabled(hour)}
+                      className={
+                        `rounded-lg px-0 py-2 w-full text-base font-semibold transition-all ` +
+                        (form.selectedHour === hour
+                          ? "bg-cyan-600 text-white "
+                          : isHourInRange(hour) && form.selectedHour
+                          ? "bg-cyan-200 text-cyan-900 "
+                          : "bg-gray-100 text-gray-700 hover:bg-cyan-100") +
+                        (isHourDisabled(hour)
+                          ? " opacity-50 cursor-not-allowed"
+                          : "")
+                      }
+                      onClick={() => updateForm({ selectedHour: hour })}
+                    >
+                      {hour}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block font-medium mb-1">Check In</label>
