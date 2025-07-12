@@ -22,7 +22,7 @@ export function useInfiniteHotels() {
       setHotels(prev => [...prev, ...newHotels]);
       setHasMore(newHotels.length > 0);
       setPage(prev => prev + 1);
-      if (page === 1) {
+      if (page === 0) {
         setFilters(res.result.filters);
         setProvinces(res.result.provinces);
       }

@@ -243,7 +243,7 @@ const RoomBookingModal: React.FC<RoomBookingModalProps> = ({
   };
 
   const handleBooking = async () => {
-    let hotelId = hotelDetail?.id;
+    let hotelId = hotelDetail?.name;
     if (!hotelId) {
       for (const hotel of hotels) {
         for (const type of hotel.types || []) {
