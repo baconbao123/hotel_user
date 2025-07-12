@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "front_end",
+			"path": "../../../../../hotel_admin/front_end"
+		},
+		{
+			"name": "front_end",
+			"path": "../../../../../hotel_owner/front_end"
+		},
+		{
+			"path": "../../.."
+		}
+	],
+	"settings": {}
+}

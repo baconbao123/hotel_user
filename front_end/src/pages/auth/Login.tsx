@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Facebook, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { CustomerLayout } from "@/layouts/CustomerLayout";
@@ -25,6 +25,8 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -40,7 +42,7 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        `http://103.161.172.90:9898/hotel/user/login?email=${email}&password=${password}&remember=${rememberMe}`
+        `http://localhost:9898/hotel/user/login?email=${email}&password=${password}&remember=${rememberMe}`
       );
 
       if (res.status === 200) {
@@ -52,7 +54,7 @@ const Login = () => {
           title: "Success",
           description: "Login successful.",
         });
-        navigate("/");
+        navigate(returnUrl);
       } else {
         toast({
           title: "Error",

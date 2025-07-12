@@ -34,15 +34,44 @@ export interface CommonData {
   usertypes?: any[];
 }
 
+interface HotelDetail {
+  name: string;
+  address: string;
+  description?: string;
+  avatar?: string;
+  facilities?: { name: string; icon: string }[];
+  images?: { name: string }[];
+  policy?: { name: string; description: string };
+}
+
+interface RoomDetail {
+  id: number | string;
+  name: string;
+  description?: string;
+  area?: number;
+  limit?: number;
+  avatarRoom?: string;
+  priceNight?: number;
+  priceHours?: number;
+  facilities?: { name: string; icon: string }[];
+  [key: string]: any;
+}
+
 interface CommonDataState {
   data: CommonData;
   status: "idle" | "loading" | "succeeded" | "failed";
   error?: string;
+  hotelDetail: HotelDetail | null;
+  roomDetail: RoomDetail | null;
+  hotels?: any[];
 }
 
 const initialState: CommonDataState = {
   data: {},
   status: "idle",
+  hotelDetail: null,
+  roomDetail: null,
+  hotels: [],
 };
 
 const typeMapping: Record<keyof CommonData, keyof CommonDataResponse> = {
@@ -146,6 +175,19 @@ const commonDataSlice = createSlice({
       });
       state.status = "idle";
     },
+    setHotelDetail(state, action: PayloadAction<HotelDetail | null>) {
+      state.hotelDetail = action.payload;
+    },
+    setRoomDetail(state, action: PayloadAction<RoomDetail | null>) {
+      state.roomDetail = action.payload;
+    },
+    clearHotelAndRoom(state) {
+      state.hotelDetail = null;
+      state.roomDetail = null;
+    },
+    setHotels(state, action: PayloadAction<any[]>) {
+      state.hotels = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -166,5 +208,5 @@ const commonDataSlice = createSlice({
   },
 });
 
-export const { clearCommonData } = commonDataSlice.actions;
+export const { clearCommonData, setHotelDetail, setRoomDetail, clearHotelAndRoom, setHotels } = commonDataSlice.actions;
 export default commonDataSlice.reducer;

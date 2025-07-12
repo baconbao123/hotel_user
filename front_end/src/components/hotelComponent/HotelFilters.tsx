@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Star } from 'lucide-react';
+import { useInfiniteHotels } from '@/hooks/useHotelsData';
 
 interface Facility {
   id: number;
@@ -27,8 +28,15 @@ interface HotelFiltersProps {
   onFilterChange?: (filters: any) => void;
 }
 
-export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: HotelFiltersProps) => {
-  // Lấy giá min/max từ prop price nếu có, nếu không thì dùng fallback
+export const HotelFilters = (props: HotelFiltersProps) => {
+  // Lấy dữ liệu filter từ props hoặc từ API (useInfiniteHotels)
+  const { filters, provinces: apiProvinces, loading } = useInfiniteHotels();
+  const provinces = props.provinces ?? apiProvinces;
+  const facilities = props.facilities ?? filters?.facilities;
+  const price = props.price ?? filters?.price;
+  const onFilterChange = props.onFilterChange;
+
+  // Lấy giá min/max từ price nếu có, nếu không thì dùng fallback
   const minPrice = price?.min;
   const maxPrice = price?.max;
 
@@ -40,6 +48,10 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
   const [selectedStars, setSelectedStars] = useState<number[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  useEffect(() => {
+    setPriceRange([minPrice, maxPrice]);
+  }, [minPrice, maxPrice]);
 
   const handleStarClick = (star: number) => {
     setSelectedStars((prev) =>
@@ -74,6 +86,16 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
     }
   }, [selectedProvince, priceRange, selectedStars, selectedAmenities]);
 
+  if (loading && !provinces?.length && !facilities?.length) return <div>Loading filters...</div>;
+
+  // Lọc unique các tỉnh thành theo tên
+  const uniqueProvinces = provinces
+    ? provinces.filter(
+        (p, idx, arr) =>
+          arr.findIndex(x => x.name.trim().toLowerCase() === p.name.trim().toLowerCase()) === idx
+      )
+    : [];
+
   return (
     <>
       <div className="md:hidden mb-4">
@@ -89,14 +111,14 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
       <div className={`${isFilterOpen ? 'block' : 'hidden'} md:block space-y-6`}>
         {/* Tỉnh thành */}
         <div>
-          <h3 className="font-medium mb-4">Tỉnh thành</h3>
+          <h3 className="font-medium mb-4">Province</h3>
           <select
             className="w-full border rounded px-2 py-1"
             value={selectedProvince}
             onChange={e => setSelectedProvince(e.target.value)}
           >
-            <option value="">Tất cả</option>
-            {provinces?.map((p) => (
+            <option value="">All</option>
+            {uniqueProvinces.map((p) => (
               <option key={p.code} value={p.name}>{p.name}</option>
             ))}
           </select>
@@ -137,7 +159,7 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
         <div>
           <h3 className="font-medium mb-4">Amenities</h3>
           <div className="space-y-2">
-            {facilities?.map((f) => (
+            {facilities?.map((f: Facility) => (
               <div key={f.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`amenity-${f.id}`}
@@ -163,4 +185,18 @@ export const HotelFilters = ({ provinces, facilities, price, onFilterChange }: H
   );
 };
 
-export default HotelFilters;
+// --- Smart wrapper for HotelFilters: fetch data and pass to presentational component ---
+const HotelFiltersContainer = (props: Omit<HotelFiltersProps, 'provinces' | 'facilities' | 'price'>) => {
+  const { filters, provinces, loading } = useInfiniteHotels();
+  if (loading) return <div>Loading filters...</div>;
+  return (
+    <HotelFilters
+      provinces={provinces}
+      facilities={filters?.facilities}
+      price={filters?.price}
+      {...props}
+    />
+  );
+};
+
+export default HotelFiltersContainer;

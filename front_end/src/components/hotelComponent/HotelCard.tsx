@@ -6,6 +6,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { message } from 'antd';
+import { Rate } from 'antd';
 
 interface HotelCardProps {
   hotel: {
@@ -39,6 +40,22 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
   useEffect(() => {
     const favs = JSON.parse(localStorage.getItem('favoriteHotels') || '[]');
     setIsFavorite(favs.includes(id));
+  }, [id]);
+
+  // Lấy ranking thật từ localStorage
+  const [realRating, setRealRating] = useState<number | null>(null);
+  const [realReviewCount, setRealReviewCount] = useState<number | null>(null);
+  useEffect(() => {
+    const allReviews = JSON.parse(localStorage.getItem('hotel_reviews') || '[]');
+    const reviews = allReviews.filter((r: any) => String(r.hotelId) === String(id));
+    if (reviews.length > 0) {
+      const avg = reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length;
+      setRealRating(Number(avg.toFixed(1)));
+      setRealReviewCount(reviews.length);
+    } else {
+      setRealRating(null);
+      setRealReviewCount(null);
+    }
   }, [id]);
 
   const toggleFavorite = (e: React.MouseEvent) => {
@@ -89,12 +106,12 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
       <CardContent className="pt-4 flex-grow">
         <div className="flex justify-between items-start">
           <h3 className="font-semibold text-lg line-clamp-1">{name}</h3>
-          <div className="flex items-center">
-            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-            <span className="text-sm font-medium ml-1">{rating}</span>
-            <span className="text-xs text-gray-500 ml-1">({reviewCount})</span>
-          </div>
         </div>
+          <div className="flex items-center">
+            <Rate disabled allowHalf value={realRating ?? rating} style={{ fontSize: 18, color: '#f59e42' }} />
+            <span className="text-sm font-medium ml-2">{(realRating ?? rating) || ''}</span>
+            <span className="text-xs text-gray-500 ml-1">({realReviewCount ?? reviewCount})</span>
+          </div>
         <p className="text-sm text-gray-500 mt-1">{location}</p>
         <div className="mt-2 flex flex-wrap gap-1">
           {amenities.slice(0, 3).map((amenity, index) => {

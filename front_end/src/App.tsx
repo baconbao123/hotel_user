@@ -16,27 +16,34 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Provider } from "react-redux";
 import { store } from "./store";
+import PaymentResult from "./pages/payment/PaymentReturn";
+import Payment from "./pages/payment/Payment";
 
-axios.interceptors.request.use((config) => {
-  const token = Cookies.get("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-}, (error) => Promise.reject(error));
+axios.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get("token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-axios.interceptors.response.use((response) => response, (error) => {
-  if (error.response?.status === 401) {
-    Cookies.remove("token");
-    Cookies.remove("refreshToken");
-    // window.location.href = "/login";
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      Cookies.remove("token");
+      Cookies.remove("refreshToken");
+      // window.location.href = "/login";
+    }
+    return Promise.reject(error);
   }
-  return Promise.reject(error);
-});
+);
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <Provider store={store}>
-
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -47,9 +54,10 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/user/home" element={<UserHome />} />
             <Route path="/hotel/:hotelId" element={<HotelDetail />} />
-            <Route path="/favorites" element={<FavoriteHotels/>} />
-          <Route path="/user/profile" element={<ProfileUser />} />
+            <Route path="/favorites" element={<FavoriteHotels />} />
+            <Route path="/user/profile" element={<ProfileUser />} />
             <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/payment/pay" element={<Payment />} />
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>

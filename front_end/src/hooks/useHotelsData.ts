@@ -22,7 +22,7 @@ export function useInfiniteHotels() {
       setHotels(prev => [...prev, ...newHotels]);
       setHasMore(newHotels.length > 0);
       setPage(prev => prev + 1);
-      if (page === 1) {
+      if (page === 0) {
         setFilters(res.result.filters);
         setProvinces(res.result.provinces);
       }
@@ -54,4 +54,23 @@ export function useInfiniteHotels() {
   }, [fetchHotels, loading, hasMore]);
 
   return { hotels, loading, error, hasMore, filters, provinces, listRef };
+}
+
+export function useHotelDetail(hotelId: string | number) {
+  const [hotel, setHotel] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!hotelId) return;
+    setLoading(true);
+    setError(null);
+    fetch(`${API_CONFIG.BASE_URL}/hotel/user/hotel/${hotelId}`)
+      .then(res => res.json())
+      .then(data => setHotel(data.result))
+      .catch(err => setError(err.message || 'Error fetching hotel detail'))
+      .finally(() => setLoading(false));
+  }, [hotelId]);
+
+  return { hotel, loading, error };
 } 

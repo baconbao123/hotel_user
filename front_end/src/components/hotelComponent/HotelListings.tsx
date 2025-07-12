@@ -17,24 +17,30 @@ const HotelListings: React.FC = () => {
   const filteredHotels = hotels.filter((hotel: any) => {
     let match = true;
     if (filterState.province) {
-      match = match && hotel.address?.includes(filterState.province);
+      // So sánh không phân biệt hoa thường, loại bỏ khoảng trắng thừa
+      match = match && hotel.address?.toLowerCase().includes(filterState.province.toLowerCase().trim());
     }
     if (filterState.amenities?.length) {
       match = match && filterState.amenities.every((id: number) => hotel.facilities?.some((f: any) => f.id === id));
     }
     if (filters?.price && filterState.priceRange) {
-      match = match && hotel.priceNight >= filterState.priceRange[0] && hotel.priceNight <= filterState.priceRange[1];
+      // Đảm bảo priceNight là số
+      const priceNight = Number(hotel.priceNight);
+      match = match && priceNight >= filterState.priceRange[0] && priceNight <= filterState.priceRange[1];
     }
+    // Log từng hotel để debug
+    // console.log('hotel.address:', hotel.address, 'hotel.priceNight:', hotel.priceNight);
     return match;
   });
 
   // Thêm log để kiểm tra dữ liệu
   // console.log('hotelsRaw:', hotelsRaw);
   // console.log('hotels:', hotels);
-  // console.log('provinces:', provinces);
-  // console.log('filters:', filters);
+  // Thêm log debug
+  console.log('provinces:', provinces);
+  console.log('filters:', filters);
+  console.log('filterState:', filterState);
   // console.log('filteredHotels:', filteredHotels);
-  // console.log('filterState:', filterState);
 
   const baseHotelImg = import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL;
 
@@ -58,12 +64,7 @@ const HotelListings: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm h-fit sticky top-20">
             <h3 className="text-lg font-semibold mb-4">Filters</h3>
-            <HotelFilters
-              provinces={provinces}
-              facilities={filters?.facilities || []}
-              price={filters?.price}
-              onFilterChange={setFilterState}
-            />
+            <HotelFilters onFilterChange={setFilterState} />
           </div>
           <div className="lg:col-span-3">
             {filteredHotels.length >= 10 ? (

@@ -61,7 +61,7 @@ const Navbar = () => {
   const fetchProfile = async () => {
     const token = Cookies.get("token");
     axios
-      .get("http://103.161.172.90:9898/hotel/user-profile", {
+      .get("http://localhost:9898/hotel/user-profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -141,14 +141,14 @@ const Navbar = () => {
                     className="relative text-white flex items-center gap-2"
                   >
                     <Avatar className="h-8 w-8">
-                     <AvatarImage
-  src={
-    userProfile.avatar
-      ? `http://103.161.172.90:9898/upload/${userProfile.avatar}`
-      : "/placeholder.svg"
-  }
-  alt="User"
-/>
+                      <AvatarImage
+                        src={
+                          userProfile.avatar
+                            ? `http://localhost:9898/upload/${userProfile.avatar}`
+                            : "/placeholder.svg"
+                        }
+                        alt="User"
+                      />
 
                       <AvatarFallback>
                         {userProfile.fullName?.[0] || "U"}
